@@ -9,7 +9,7 @@
 
 
   <name>cporder Maven plugin</name>
-  <description>The maven main core project description</description>
+  <description>Maven plugin that checks whether classpath order may cause problems.</description>
   <url>https://github.com/ctalau/cporder-maven-plugin</url>
 
   <licenses>
