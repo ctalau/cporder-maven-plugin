@@ -44,6 +44,18 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
   private MavenProject project;
 
   /**
+   * Whether to allow the main artifact to redefine a class contained in
+   * one of its dependencies.
+   */
+  private boolean allowMainArtifactOverrides = false;
+
+  /**
+   * Whether the test classpath should be also checked for ordering
+   * problems.
+   */
+  private boolean checkTestClassPath = true;
+
+  /**
    * Executes the plugin.
    */
   public void execute() throws MojoExecutionException {
@@ -53,20 +65,30 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
     // A mapping from classes to the dependency which they come from.
     Map<String, Artifact> allClasses = new HashMap<String, Artifact>();
 
-    // Index the main artifact.
-    Artifact mainArtifact = project.getArtifact();
-    try {
-      checkDuplicates(allClasses, mainArtifact);
-    } catch (IOException e) {
-      throw new MojoExecutionException(
-              "Error reading main artifact: "
-                      + mainArtifact.getArtifactId(), e);
+    if (!allowMainArtifactOverrides) {
+      // Index the main artifact.
+      Artifact mainArtifact = project.getArtifact();
+      try {
+        checkDuplicates(allClasses, mainArtifact);
+      } catch (IOException e) {
+        throw new MojoExecutionException(
+                "Error reading main artifact: "
+                        + mainArtifact.getArtifactId(), e);
+      }
     }
 
     for (Artifact dependency : dependencies) {
-      // Index jar dependencies with scope runtime and compile.
+      boolean shouldIndex = false;
       if (Artifact.SCOPE_COMPILE.equals(dependency.getScope())
               || Artifact.SCOPE_RUNTIME.equals(dependency.getScope())) {
+        shouldIndex = true;
+      } else if (checkTestClassPath &&
+              Artifact.SCOPE_TEST.equals(dependency.getScope())) {
+        shouldIndex = true;
+      }
+
+      // Index jar dependencies with scope runtime and compile.
+      if (shouldIndex) {
         getLog().debug("Analyzing dependency: " + dependency.getArtifactId());
         try {
           checkDuplicates(allClasses, dependency);
