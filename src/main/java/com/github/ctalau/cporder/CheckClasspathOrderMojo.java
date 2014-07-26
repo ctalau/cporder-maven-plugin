@@ -3,7 +3,9 @@ package com.github.ctalau.cporder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -50,10 +52,22 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
   private boolean allowMainArtifactOverrides = false;
 
   /**
-   * Whether the test classpath should be also checked for ordering
-   * problems.
+   * The list of scopes of the dependencies to check for ordering issues.
+   *
+   * The test scope may be omitted if used to inject a mock implementation by
+   * pushing it in front of the normal implementation in the classpath.
+   *
+   * The provided and runtime dependencies may be ommited if the runtime
+   * environment is known to have a higher precedence for its classes over the
+   * application classes. For example, this is the case of Tomcat. However, in
+   * this case there are even less reasons to include in your app a class that
+   * is not going to be loaded.
    */
-  private boolean checkTestClassPath = true;
+  private List<String> scopesToCheck = Arrays.asList(
+          Artifact.SCOPE_COMPILE,
+          Artifact.SCOPE_RUNTIME,
+          Artifact.SCOPE_TEST,
+          Artifact.SCOPE_PROVIDED);
 
   /**
    * Executes the plugin.
@@ -78,17 +92,8 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
     }
 
     for (Artifact dependency : dependencies) {
-      boolean shouldIndex = false;
-      if (Artifact.SCOPE_COMPILE.equals(dependency.getScope())
-              || Artifact.SCOPE_RUNTIME.equals(dependency.getScope())) {
-        shouldIndex = true;
-      } else if (checkTestClassPath &&
-              Artifact.SCOPE_TEST.equals(dependency.getScope())) {
-        shouldIndex = true;
-      }
-
-      // Index jar dependencies with scope runtime and compile.
-      if (shouldIndex) {
+      // Index jar dependencies with one of the configured scopes.
+      if (scopesToCheck.contains(dependency.getScope())) {
         getLog().debug("Analyzing dependency: " + dependency.getArtifactId());
         try {
           checkDuplicates(allClasses, dependency);
@@ -153,5 +158,4 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
       }
     }
   }
-
 }
