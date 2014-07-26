@@ -14,7 +14,7 @@ This plugin executes by default in the *verify* phase of the Maven lifecycle. In
 <build>
   <plugins>
     <plugin>
-      <groupId>ro.ctalau</groupId>
+      <groupId>com.github.ctalau</groupId>
       <artifactId>cporder-maven-plugin</artifactId>
       <version>1.0</version>
     </plugin>
