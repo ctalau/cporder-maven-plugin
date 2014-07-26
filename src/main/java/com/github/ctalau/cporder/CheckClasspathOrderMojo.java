@@ -72,6 +72,7 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
         }
       }
     }
+    getLog().info("No problems detected!");
   }
 
   /**
