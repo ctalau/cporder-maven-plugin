@@ -28,7 +28,7 @@ import org.apache.maven.project.MavenProject;
  * depending on the order of the jars in the classpath of the project.
  */
 @Mojo(name = "verify",
-  requiresDependencyResolution = ResolutionScope.RUNTIME,
+  requiresDependencyResolution = ResolutionScope.TEST,
   defaultPhase = LifecyclePhase.VERIFY,
   requiresProject = true,
   threadSafe = true)

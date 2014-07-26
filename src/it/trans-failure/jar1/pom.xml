@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.github.it</groupId>
-    <artifactId>provided-scope</artifactId>
+    <artifactId>trans-failure</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
   <groupId>com.github.it</groupId>
@@ -15,4 +15,11 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  <dependencies>
+    <dependency>
+      <groupId>${parent.groupId}</groupId>
+      <artifactId>jar2</artifactId>
+      <version>${parent.version}</version>
+    </dependency>
+  </dependencies>
 </project>
