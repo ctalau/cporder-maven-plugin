@@ -109,10 +109,12 @@
   </build>
 
   <profiles>
+    <!-- Actions to be done only for a release. -->
     <profile>
       <id>release</id>
       <build>
         <plugins>
+
           <!-- Generate a *-sources.jar artifact. -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -121,7 +123,6 @@
             <executions>
               <execution>
                 <id>attach-sources</id>
-                <phase>verify</phase>
                 <goals>
                   <goal>jar-no-fork</goal>
                 </goals>
@@ -139,6 +140,22 @@
                 <id>attach-javadocs</id>
                 <goals>
                   <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!--  GPG signing for all artifacts. -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
                 </goals>
               </execution>
             </executions>
