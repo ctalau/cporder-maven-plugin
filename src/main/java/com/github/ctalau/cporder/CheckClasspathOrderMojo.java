@@ -1,4 +1,4 @@
-package ro.ctalau;
+package com.github.ctalau.cporder;
 
 import java.io.File;
 import java.io.FileInputStream;
