@@ -8,7 +8,7 @@ Such a class contained in two jars may cause unexpected runtime behaviour to the
 Configuration
 -------------
 
-This plugin executes by default in the *verify* phase of the Maven lifecycle. In order to configure it in the *pom.xml* file, you should include the following snippet:
+This plugin executes the *verify* goal by default in the *verify* phase of the Maven lifecycle. In order to configure it in the *pom.xml* file, you should include the following snippet:
 
 ```xml
 <build>
@@ -17,6 +17,14 @@ This plugin executes by default in the *verify* phase of the Maven lifecycle. In
       <groupId>com.github.ctalau</groupId>
       <artifactId>cporder-maven-plugin</artifactId>
       <version>1.0</version>
+      <executions>
+          <execution>
+            <id>check-cporder</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
     </plugin>
   </plugins>
 </build>

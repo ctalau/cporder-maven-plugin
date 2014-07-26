@@ -21,10 +21,9 @@
         <version>@project.version@</version>
         <executions>
           <execution>
-            <id>touch</id>
-            <phase>validate</phase>
+            <id>check-cporder</id>
             <goals>
-              <goal>touch</goal>
+              <goal>verify</goal>
             </goals>
           </execution>
         </executions>

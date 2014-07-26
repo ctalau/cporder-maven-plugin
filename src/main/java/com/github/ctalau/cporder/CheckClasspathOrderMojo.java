@@ -20,15 +20,16 @@ import org.apache.maven.project.MavenProject;
 
 /**
  * Verifies whether there is a class that is present in more than one
- * jar dependencies of the project. 
- * 
+ * jar dependencies of the project.
+ *
  * The presence of such a class may produce different runtime behaviors,
  * depending on the order of the jars in the classpath of the project.
  */
 @Mojo(name = "verify",
   requiresDependencyResolution = ResolutionScope.RUNTIME,
   defaultPhase = LifecyclePhase.VERIFY,
-  requiresProject = true)
+  requiresProject = true,
+  threadSafe = true)
 public class CheckClasspathOrderMojo extends AbstractMojo {
 
   /**
@@ -39,7 +40,7 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
   /**
    * The project in which the plugin is executing.
    */
-  @Parameter(defaultValue = "${project}", readonly = true)
+  @Parameter(defaultValue = "${project}", readonly = true, required = true)
   private MavenProject project;
 
   /**
@@ -49,7 +50,7 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
     @SuppressWarnings("unchecked")
     Set<Artifact> dependencies = project.getArtifacts();
 
-    // A mapping from classes to the dependency which they come from. 
+    // A mapping from classes to the dependency which they come from.
     Map<String, Artifact> allClasses = new HashMap<String, Artifact>();
 
     for (Artifact dependency : dependencies) {
@@ -76,15 +77,15 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
   }
 
   /**
-   * Checks whether the class files from the given dependency occur also in 
+   * Checks whether the class files from the given dependency occur also in
    * other dependencies.
-   * 
+   *
    * @param allClasses All the classes collected so far from other dependencies.
    * @param dependency The current dependency.
-   * 
-   * @throws MojoExecutionException If there are duplicates or the dependency 
+   *
+   * @throws MojoExecutionException If there are duplicates or the dependency
    * cannot be found locally.
-   * 
+   *
    * @throws IOException If the dependency file cannot be read.
    */
   private void checkDuplicates(Map<String, Artifact> allClasses, Artifact dependency)
@@ -95,7 +96,7 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
               + dependency.getArtifactId()
               + " cannot be found in the local repository.");
     }
-    
+
     ZipInputStream zip = new ZipInputStream(new FileInputStream(dependencyFile));
     try {
       while (true) {
@@ -110,8 +111,8 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
           Artifact otherDependency = allClasses.put(className, dependency);
           if (otherDependency != null) {
             // The class already appears in another dependency.
-            throw new MojoExecutionException("Class :" + className + 
-                    " appears in two dependencies: " + otherDependency + " and " + 
+            throw new MojoExecutionException("Class :" + className +
+                    " appears in two dependencies: " + otherDependency + " and " +
                     dependency);
           }
         }

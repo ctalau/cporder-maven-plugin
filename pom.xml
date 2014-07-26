@@ -174,7 +174,7 @@
             </configuration>
           </plugin>
 
-          <!--  Maven release plugin. -->
+          <!-- Maven release plugin. -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-release-plugin</artifactId>
@@ -202,22 +202,25 @@
             <version>1.7</version>
             <configuration>
               <debug>true</debug>
+              <!-- Clone the test-projects before running the test. -->
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-              <pomIncludes>
-                <pomInclude>*/pom.xml</pomInclude>
-              </pomIncludes>
-              <postBuildHookScript>verify</postBuildHookScript>
+              <!-- Install the plugin into a local repo -->
               <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+              <!-- After each test, call verify.groovy to check the result. -->
+              <postBuildHookScript>verify</postBuildHookScript>
+              <!-- Specifies the repository to use for integration tests. -->
               <settingsFile>src/it/settings.xml</settingsFile>
+              <!-- Run the clean and verify properties of the tested plugins. -->
               <goals>
                 <goal>clean</goal>
-                <goal>test-compile</goal>
+                <goal>verify</goal>
               </goals>
             </configuration>
             <executions>
               <execution>
                 <id>integration-test</id>
                 <goals>
+                  <!-- Install the plugin, run the integration tests and then verify. -->
                   <goal>install</goal>
                   <goal>integration-test</goal>
                   <goal>verify</goal>
