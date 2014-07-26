@@ -53,24 +53,32 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
     // A mapping from classes to the dependency which they come from.
     Map<String, Artifact> allClasses = new HashMap<String, Artifact>();
 
+    // Index the main artifact.
+    Artifact mainArtifact = project.getArtifact();
+    try {
+      checkDuplicates(allClasses, mainArtifact);
+    } catch (IOException e) {
+      throw new MojoExecutionException(
+              "Error reading main artifact: "
+                      + mainArtifact.getArtifactId(), e);
+    }
+
     for (Artifact dependency : dependencies) {
-      if (JAR_ARTIFACT_TYPE.equals(dependency.getType())) {
-        // Analyze jar dependencies with scope runtime and compile.
-        if (Artifact.SCOPE_COMPILE.equals(dependency.getScope())
-                || Artifact.SCOPE_RUNTIME.equals(dependency.getScope())) {
-          getLog().debug("Analyzing dependency: " + dependency.getArtifactId());
-          try {
-            checkDuplicates(allClasses, dependency);
-          } catch (IOException e) {
-            throw new MojoExecutionException(
-                    "Error reading dependency artifact: "
-                            + dependency.getArtifactId(), e);
-          }
-        } else {
-          getLog().debug(
-                  "Dependency " + dependency.getArtifactId() + " with scope: "
-                          + dependency.getScope());
+      // Index jar dependencies with scope runtime and compile.
+      if (Artifact.SCOPE_COMPILE.equals(dependency.getScope())
+              || Artifact.SCOPE_RUNTIME.equals(dependency.getScope())) {
+        getLog().debug("Analyzing dependency: " + dependency.getArtifactId());
+        try {
+          checkDuplicates(allClasses, dependency);
+        } catch (IOException e) {
+          throw new MojoExecutionException(
+                  "Error reading dependency artifact: "
+                          + dependency.getArtifactId(), e);
         }
+      } else {
+        getLog().debug(
+                "Dependency " + dependency.getArtifactId() + " with scope: "
+                        + dependency.getScope());
       }
     }
     getLog().info("No problems detected!");
@@ -90,35 +98,37 @@ public class CheckClasspathOrderMojo extends AbstractMojo {
    */
   private void checkDuplicates(Map<String, Artifact> allClasses, Artifact dependency)
           throws MojoExecutionException, IOException {
-    File dependencyFile = dependency.getFile();
-    if (dependencyFile == null) {
-      throw new MojoExecutionException("Dependency "
-              + dependency.getArtifactId()
-              + " cannot be found in the local repository.");
-    }
+    if (JAR_ARTIFACT_TYPE.equals(dependency.getType())) {
+      File dependencyFile = dependency.getFile();
+      if (dependencyFile == null) {
+        throw new MojoExecutionException("Dependency "
+                + dependency.getArtifactId()
+                + " cannot be found in the local repository.");
+      }
 
-    ZipInputStream zip = new ZipInputStream(new FileInputStream(dependencyFile));
-    try {
-      while (true) {
-        ZipEntry e = null;
-        e = zip.getNextEntry();
-        if (e == null)
-          break;
-        String className = e.getName();
-        // We look only for class files.
-        if (className.endsWith(".class")) {
-          getLog().debug("Found class: " + e);
-          Artifact otherDependency = allClasses.put(className, dependency);
-          if (otherDependency != null) {
-            // The class already appears in another dependency.
-            throw new MojoExecutionException("Class :" + className +
-                    " appears in two dependencies: " + otherDependency + " and " +
-                    dependency);
+      ZipInputStream zip = new ZipInputStream(new FileInputStream(dependencyFile));
+      try {
+        while (true) {
+          ZipEntry e = null;
+          e = zip.getNextEntry();
+          if (e == null)
+            break;
+          String className = e.getName();
+          // We look only for class files.
+          if (className.endsWith(".class")) {
+            getLog().debug("Found class: " + e);
+            Artifact otherDependency = allClasses.put(className, dependency);
+            if (otherDependency != null) {
+              // The class already appears in another dependency.
+              throw new MojoExecutionException("Class :" + className +
+                      " appears in two dependencies: " + otherDependency + " and " +
+                      dependency);
+            }
           }
         }
+      } finally {
+        zip.close();
       }
-    } finally {
-      zip.close();
     }
   }
 
