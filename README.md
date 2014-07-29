@@ -1,5 +1,4 @@
-![Built On CloudBees](http://www.cloudbees.com/sites/default/files/Button-Built-on-CB-1.png)
-cporder-maven-plugin
+cporder-maven-plugin ![Built On CloudBees](http://www.cloudbees.com/sites/default/files/Button-Built-on-CB-1.png)
 ====================
 
 This maven plugin checks whether two different maven dependencies with the artifact scope being either *compile* or *runtime* and artifact type being *jar* contain classes with the same (fully qualified) name.
